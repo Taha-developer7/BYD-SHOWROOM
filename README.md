@@ -1,49 +1,35 @@
-# React + Vite
+# BYD 3D Showroom - Step 2 Model Lab
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This step is a temporary testing dashboard for the local BYD GLB collection. It uses React, Vite, Tailwind CSS, native Three.js, GLTFLoader, OrbitControls, GSAP, and ScrollTrigger. The final cinematic landing page is intentionally not included.
 
-Currently, two official plugins are available:
+## Run
 
+```bash
+npm install
+npm run dev
+```
 
-## React Compiler
+Open the local Vite URL, choose a vehicle from the selector, and test rotation, zoom, reset, auto-rotation, fullscreen, loading progress, and model switching.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Models
 
-## Expanding the ESLint configuration
+All model files remain in one location:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-# BYD Showroom Foundation
+```text
+public/models/
+```
 
-This is the technical foundation for a premium BYD 3D showroom: React, Vite, Tailwind CSS, native Three.js, GLTFLoader, OrbitControls, GSAP, and ScrollTrigger. The full cinematic showroom will be built in a later stage.
+The current dashboard is configured for every GLB file detected in that directory. Exact filenames are centralized in `src/data/vehicles.js`; do not rename or duplicate the files. New models should be added there with their exact `/models/<filename>.glb` URL.
 
-## Add GLB Models
+Only the first selected vehicle loads initially. Other vehicles load on demand and are cached after their first request. Cached models are reused when selected again.
 
-1. Place your `.glb` files inside:
+## Temporary Test Features
 
-	`public/models/`
+- Native Three.js scene with realistic temporary lights and a ground plane
+- Automatic centering, bottom alignment, scaling, and camera framing
+- OrbitControls with damping, bounded zoom, and limited vertical rotation
+- Optional slow auto-rotation that pauses during interaction and resumes afterward
+- GSAP model entrance, exit, switching, and reset animations
+- Loading percentage, retryable errors, WebGL fallback, debug metrics, and responsive resize handling
 
-2. For example:
-
-	`public/models/byd-seal.glb`
-
-3. Open `src/data/vehicles.js`.
-
-4. Add or update a model entry:
-
-	```js
-	{
-	  id: 'seal',
-	  name: 'BYD SEAL',
-	  model: '/models/byd-seal.glb',
-	}
-	```
-
-5. Start the project:
-
-	```bash
-	npm install
-	npm run dev
-	```
-
-The example viewer currently points to `/models/byd-seal.glb`. Until you add that file, it will show the model load error without crashing the app.
-"# BYD-SHOWROOM" 
+This is Step 2 only. The next stage will build the cinematic showroom experience around the verified 3D vehicle system.
