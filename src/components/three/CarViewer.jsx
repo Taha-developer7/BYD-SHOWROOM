@@ -157,8 +157,15 @@ const CarViewer = forwardRef(function CarViewer({
     const keyLight = new THREE.DirectionalLight(0xffffff, 3.2)
     keyLight.position.set(7, 10, 8)
     keyLight.castShadow = true
-    keyLight.shadow.mapSize.set(2048, 2048)
-    keyLight.shadow.bias = -0.0001
+    keyLight.shadow.mapSize.set(1024, 1024)
+    keyLight.shadow.camera.near = 1
+    keyLight.shadow.camera.far = 24
+    keyLight.shadow.camera.left = -4.5
+    keyLight.shadow.camera.right = 4.5
+    keyLight.shadow.camera.top = 4.5
+    keyLight.shadow.camera.bottom = -4.5
+    keyLight.shadow.bias = -0.0004
+    keyLight.shadow.normalBias = 0.02
     scene.add(keyLight)
 
     const fillLight = new THREE.DirectionalLight(0xdfe7f5, 1.8)
@@ -188,7 +195,7 @@ const CarViewer = forwardRef(function CarViewer({
       camera.aspect = clientWidth / clientHeight
       camera.updateProjectionMatrix()
       renderer.setSize(clientWidth, clientHeight, false)
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, clientWidth < 768 ? 1.5 : 2))
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, clientWidth < 768 ? 1.25 : 1.75))
     }
 
     const setAutoRotate = (enabled) => {
@@ -269,10 +276,9 @@ const CarViewer = forwardRef(function CarViewer({
         model.traverse((child) => {
           if (child.isMesh) {
             child.castShadow = true
-            child.receiveShadow = true
+            child.receiveShadow = false
             if (child.material) {
-              child.material.envMapIntensity = 1.3
-              child.material.needsUpdate = true
+              child.material.envMapIntensity = 1.25
             }
           }
         })
@@ -343,20 +349,36 @@ const CarViewer = forwardRef(function CarViewer({
     }
     loadVehicle(modelPath, { scale, position, rotation, cameraDistance, cameraHeight })
 
-    let animationFrameId
+    let isVisible = true
+    let animationFrameId = null
+
     const animate = () => {
+      if (!isVisible) {
+        animationFrameId = null
+        return
+      }
       controls.update()
       renderer.render(scene, camera)
       animationFrameId = window.requestAnimationFrame(animate)
     }
     animate()
 
+    // Pause WebGL render loop completely when off-screen to save CPU & GPU during scrolling
+    const observer = new IntersectionObserver(([entry]) => {
+      isVisible = entry.isIntersecting
+      if (isVisible && !animationFrameId) {
+        animate()
+      }
+    }, { threshold: 0.05 })
+    observer.observe(container)
+
     return () => {
+      observer.disconnect()
       window.removeEventListener('resize', resize)
       window.clearTimeout(state.resumeTimer)
       controls.removeEventListener('start', onStart)
       controls.removeEventListener('end', onEnd)
-      window.cancelAnimationFrame(animationFrameId)
+      if (animationFrameId) window.cancelAnimationFrame(animationFrameId)
       controls.dispose()
       pmremGenerator.dispose()
       roomEnv.dispose()

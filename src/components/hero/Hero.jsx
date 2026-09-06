@@ -14,15 +14,23 @@ import VehicleSelector from './VehicleSelector'
       gsap.from('.hero-reveal', { y: 34, autoAlpha: 0, duration: 0.9, stagger: 0.1, delay: 0.35, ease: 'power3.out' })
       gsap.from('.hero-vehicle-frame', { scale: 0.92, autoAlpha: 0, duration: 1.4, delay: 0.45, ease: 'power3.out' })
       gsap.to('.hero-glow', { x: 25, y: -15, duration: 5, repeat: -1, yoyo: true, ease: 'sine.inOut' })
-      const onMove = (event) => {
-        if (window.matchMedia('(max-width: 768px), (prefers-reduced-motion: reduce)').matches) return
-        const x = (event.clientX / window.innerWidth - 0.5) * 10
-        const y = (event.clientY / window.innerHeight - 0.5) * 8
-        gsap.to(copyRef.current, { x: x * -0.5, y: y * -0.5, duration: 0.8, overwrite: true })
-        gsap.to('.hero-vehicle-frame', { x, y, duration: 1.2, overwrite: true })
+      if (!window.matchMedia('(max-width: 768px), (prefers-reduced-motion: reduce)').matches) {
+        const setCopyX = gsap.quickTo(copyRef.current, 'x', { duration: 0.8, ease: 'power2.out' })
+        const setCopyY = gsap.quickTo(copyRef.current, 'y', { duration: 0.8, ease: 'power2.out' })
+        const setFrameX = gsap.quickTo('.hero-vehicle-frame', 'x', { duration: 1.2, ease: 'power2.out' })
+        const setFrameY = gsap.quickTo('.hero-vehicle-frame', 'y', { duration: 1.2, ease: 'power2.out' })
+
+        const onMove = (event) => {
+          const x = (event.clientX / window.innerWidth - 0.5) * 10
+          const y = (event.clientY / window.innerHeight - 0.5) * 8
+          setCopyX(x * -0.5)
+          setCopyY(y * -0.5)
+          setFrameX(x)
+          setFrameY(y)
+        }
+        window.addEventListener('pointermove', onMove, { passive: true })
+        return () => window.removeEventListener('pointermove', onMove)
       }
-      window.addEventListener('pointermove', onMove)
-      return () => window.removeEventListener('pointermove', onMove)
     }, heroRef)
     return () => context.revert()
   }, [])

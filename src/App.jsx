@@ -21,7 +21,6 @@ import vehicles from './data/vehicles'
 function App() {
   const [selectedId, setSelectedId] = useState('2024-byd-seal')
   const [ready, setReady] = useState(false)
-  const [scrollProgress, setScrollProgress] = useState(0)
   const [reducedMotion, setReducedMotion] = useState(false)
   const viewerRef = useRef(null)
   const selectedVehicle = useMemo(() => vehicles.find((vehicle) => vehicle.id === selectedId) || vehicles[0], [selectedId])
@@ -35,16 +34,6 @@ function App() {
     updateMotion()
     mediaQuery.addEventListener('change', updateMotion)
     return () => mediaQuery.removeEventListener('change', updateMotion)
-  }, [])
-
-  useEffect(() => {
-    const updateProgress = () => {
-      const max = document.documentElement.scrollHeight - window.innerHeight
-      setScrollProgress(max > 0 ? window.scrollY / max : 0)
-    }
-    window.addEventListener('scroll', updateProgress, { passive: true })
-    updateProgress()
-    return () => window.removeEventListener('scroll', updateProgress)
   }, [])
 
   useEffect(() => {
@@ -62,7 +51,7 @@ function App() {
 
   return <>
     <LoadingScreen ready={ready} />
-    <ProgressBar progress={scrollProgress} />
+    <ProgressBar />
     <CustomCursor />
     <Navbar />
     <main>
